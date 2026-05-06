@@ -108,6 +108,29 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [roomId, user, profile, supabase])
 
+  // Handle tab close / browser back
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (roomId) {
+        // We can't use async/await here reliably, but we can try a fire-and-forget
+        // Or better yet, rely on a more robust presence-to-db sync if available
+        // For now, we attempt a quick update
+        const currentCount = onlineUsers.length
+        const newCount = Math.max(0, currentCount - 1)
+        supabase
+          .from('rooms')
+          .update({ 
+            member_count: newCount,
+            status: newCount === 0 ? 'inactive' : 'active'
+          })
+          .eq('id', roomId)
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [roomId, onlineUsers, supabase])
+
   const joinChat = async () => {
     if (!user) return
     setIsSearching(true)
@@ -133,24 +156,18 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     if (!roomId || !user) return
 
     try {
-      // Decrement member_count
-      const { data: room } = await supabase
+      // Use the actual online users count from Presence to update DB
+      // If we are the last one, newCount will be 0
+      const currentCount = onlineUsers.length
+      const newCount = Math.max(0, currentCount - 1)
+
+      await supabase
         .from('rooms')
-        .select('member_count')
+        .update({ 
+          member_count: newCount,
+          status: newCount === 0 ? 'inactive' : 'active'
+        })
         .eq('id', roomId)
-        .single()
-
-      if (room) {
-        const newCount = Math.max(0, room.member_count - 1)
-        await supabase
-          .from('rooms')
-          .update({ 
-            member_count: newCount,
-            status: newCount === 0 ? 'inactive' : 'active'
-          })
-          .eq('id', roomId)
-      }
-
 
       setRoomId(null)
       setMessages([])
@@ -158,6 +175,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Error leaving chat:', error)
     }
   }
+
 
   const sendMessage = async (content: string, type: 'text' | 'image' | 'gif' | 'sticker' = 'text', mediaUrl?: string) => {
     if (!roomId || !user) return

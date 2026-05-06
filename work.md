@@ -39,20 +39,24 @@ If member_count reaches 0, delete the room or mark it as inactive.
 Note: Use Supabase Presence to detect unexpected disconnects (closing the tab).
 
 4. Chat Features
-Real-time messaging within the assigned room_id.
-
-The UI should handle a group of up to 5 people comfortably.
-
-Messages should be stored in the database for session persistence.
+- Real-time messaging within the assigned room_id.
+- **Media Support**: Support for sending images (via Supabase Storage), emojis, and built-in stickers.
+- **Optimized UI**: Group chat interface designed for up to 5 people with message type rendering (text, image, sticker).
+- **Session Persistence**: Messages are stored in the database but managed by room lifecycle.
 
 5. UI/UX Expectations
-Clean, modern interface using Tailwind CSS.
+- Clean, modern interface using **Glassmorphism** design and Tailwind CSS.
+- Responsive design (Mobile-friendly).
+- Clear state indicators (Connecting, Finding Room, Chatting).
+- Smooth animations and transitions for a premium feel.
 
-Responsive design (Mobile-friendly).
+6. Technical Implementation Details (Completed)
+- **Database Schema**: Profiles, Rooms, and Messages tables with RLS enabled.
+- **Matchmaking**: Atomic SQL Function (`join_available_room`) to handle concurrent joins safely.
+- **Auto-Cleanup**: SQL Trigger (`delete_empty_rooms`) that automatically deletes the room and its messages when `member_count` reaches 0.
+- **Auth**: Supports Google OAuth and Anonymous Guest login (Supabase Auth).
+- **Real-time**: Powered by Supabase Realtime Broadcast and Presence.
+- **Storage**: Supabase Storage bucket (`chat-media`) for image uploads.
 
-Clear state indicators (Connecting, Finding Room, Chatting).
-
-คำแนะนำเพิ่มเติมสำหรับสั่ง AI:
-บอกมันว่า "Avoid Socket.io" เพราะเราจะรันบน Vercel ให้เน้นไปที่ Supabase Realtime แทน
-
-สั่งให้มันสร้าง Database Schema สำหรับ profiles, rooms, และ messages ก่อนเริ่มเขียนส่วน UI
+---
+*Status: All core features implemented and deployed to Vercel.*

@@ -9,7 +9,7 @@ import Navbar from './Navbar'
 
 export default function AppContent() {
   const { user, loading } = useAuth()
-  const { roomId, isSearching } = useChat()
+  const { roomId, isSearching, joinChat } = useChat()
 
   if (loading) {
     return (
@@ -40,7 +40,7 @@ export default function AppContent() {
               Join a room and start talking to 5 random people instantly.
             </p>
             <button
-              onClick={() => useChat().joinChat()}
+              onClick={() => joinChat()}
               className="w-full py-4 bg-accent text-accent-foreground font-bold rounded-xl hover:opacity-90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-accent/20"
             >
               Join Chat Room

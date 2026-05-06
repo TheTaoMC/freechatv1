@@ -12,6 +12,9 @@ type Message = {
   user_id: string
   message_type: 'text' | 'image' | 'gif' | 'sticker'
   media_url?: string
+  reply_to_id?: number
+  reply_to_content?: string
+  reply_to_name?: string
 }
 
 type ChatContextType = {
@@ -20,9 +23,10 @@ type ChatContextType = {
   isSearching: boolean
   joinChat: () => Promise<void>
   leaveChat: () => Promise<void>
-  sendMessage: (content: string, type?: 'text' | 'image' | 'gif' | 'sticker', mediaUrl?: string) => Promise<void>
+  sendMessage: (content: string, type?: 'text' | 'image' | 'gif' | 'sticker', mediaUrl?: string, replyTo?: { id: number, content: string, name: string }) => Promise<void>
   onlineUsers: any[]
 }
+
 
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -177,7 +181,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
 
-  const sendMessage = async (content: string, type: 'text' | 'image' | 'gif' | 'sticker' = 'text', mediaUrl?: string) => {
+  const sendMessage = async (content: string, type: 'text' | 'image' | 'gif' | 'sticker' = 'text', mediaUrl?: string, replyTo?: { id: number, content: string, name: string }) => {
     if (!roomId || !user) return
 
     const { error } = await supabase.from('messages').insert({
@@ -186,11 +190,15 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       user_name: profile?.display_name || 'Guest',
       content: content,
       message_type: type,
-      media_url: mediaUrl
+      media_url: mediaUrl,
+      reply_to_id: replyTo?.id,
+      reply_to_content: replyTo?.content,
+      reply_to_name: replyTo?.name
     })
 
     if (error) throw error
   }
+
 
 
   return (

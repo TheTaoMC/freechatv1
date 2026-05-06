@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/utils/supabase'
-import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2, Sticker as StickerIcon } from 'lucide-react'
+import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2, Sticker as StickerIcon, Reply } from 'lucide-react'
 import EmojiPicker, { Theme } from 'emoji-picker-react'
 
 const STICKERS = [
@@ -15,7 +15,7 @@ const STICKERS = [
   { id: 'rabbit-2', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKMGpxx32LJAuS4/giphy.gif' },
   { id: 'cool-dog', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKovvW3T6u8yJSU/giphy.gif' },
   { id: 'heart-1', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKVUn7iM8FMEU24/giphy.gif' },
-  { id: 'party', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l41lTfuxV5w5eP5W8/giphy.gif' },
+  { id: 'party', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l41lTfuxV5w5eP5W8/giphy.gif' },
 ]
 
 export default function ChatScreen() {
@@ -25,7 +25,8 @@ export default function ChatScreen() {
   const [isEmojiOpen, setIsEmojiOpen] = useState(false)
   const [isStickerOpen, setIsStickerOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-
+  const [replyingTo, setReplyingTo] = useState<{ id: number, content: string, name: string } | null>(null)
+  
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
@@ -40,9 +41,13 @@ export default function ChatScreen() {
     e.preventDefault()
     if (!text.trim()) return
     const content = text
+    const reply = replyingTo
+    
     setText('')
     setIsEmojiOpen(false)
-    await sendMessage(content)
+    setReplyingTo(null)
+    
+    await sendMessage(content, 'text', undefined, reply || undefined)
   }
 
   const onEmojiClick = (emojiData: any) => {
@@ -68,10 +73,11 @@ export default function ChatScreen() {
         .from('chat-media')
         .getPublicUrl(fileName)
 
-      await sendMessage('Sent an image', 'image', publicUrl)
+      await sendMessage('Sent an image', 'image', publicUrl, replyingTo || undefined)
+      setReplyingTo(null)
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Failed to upload image. Make sure you created the "chat-media" bucket in Supabase and set it to Public.')
+      alert('Failed to upload image.')
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -79,7 +85,8 @@ export default function ChatScreen() {
   }
 
   const handleStickerSend = async (url: string) => {
-    await sendMessage('Sent a sticker', 'sticker', url)
+    await sendMessage('Sent a sticker', 'sticker', url, replyingTo || undefined)
+    setReplyingTo(null)
     setIsStickerOpen(false)
   }
 
@@ -125,7 +132,7 @@ export default function ChatScreen() {
             return (
               <div
                 key={msg.id || i}
-                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group/msg`}
               >
                 {!isMe && (
                   <span className="text-xs font-medium text-slate-400 mb-1 ml-1">
@@ -133,38 +140,57 @@ export default function ChatScreen() {
                   </span>
                 )}
                 
-                <div
-                  className={`max-w-[70%] group relative ${
-                    msg.message_type === 'text' 
-                      ? (isMe ? 'bg-accent text-accent-foreground rounded-2xl rounded-tr-none px-4 py-2' : 'bg-white/10 text-white rounded-2xl rounded-tl-none px-4 py-2')
-                      : 'p-1'
-                  }`}
-                >
-                  {msg.message_type === 'text' && (
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
-                  )}
-                  
-                  {msg.message_type === 'image' && (
-                    <div className="rounded-xl overflow-hidden shadow-xl border border-white/10">
-                      <img 
-                        src={msg.media_url} 
-                        alt="Shared image" 
-                        className="max-w-full max-h-[300px] object-contain bg-black/20"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
+                <div className={`relative flex items-center gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div
+                    className={`max-w-full relative shadow-sm ${
+                      msg.message_type === 'text' 
+                        ? (isMe ? 'bg-accent text-accent-foreground rounded-2xl rounded-tr-none px-4 py-2' : 'bg-white/10 text-white rounded-2xl rounded-tl-none px-4 py-2')
+                        : 'p-1'
+                    }`}
+                  >
+                    {/* Reply Preview in Bubble */}
+                    {msg.reply_to_id && (
+                      <div className={`text-[10px] mb-1 p-2 rounded-lg bg-black/20 border-l-2 border-accent/50 ${isMe ? 'text-accent-foreground/80' : 'text-slate-300'}`}>
+                        <p className="font-bold opacity-70">{msg.reply_to_name}</p>
+                        <p className="truncate max-w-[200px]">{msg.reply_to_content}</p>
+                      </div>
+                    )}
 
-                  {(msg.message_type === 'gif' || msg.message_type === 'sticker') && (
-                    <div className="rounded-xl overflow-hidden">
-                      <img 
-                        src={msg.media_url} 
-                        alt="Sticker" 
-                        className="max-w-full max-h-[180px] object-contain transition-transform hover:scale-110"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
+                    {msg.message_type === 'text' && (
+                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                    )}
+                    
+                    {msg.message_type === 'image' && (
+                      <div className="rounded-xl overflow-hidden shadow-xl border border-white/10">
+                        <img 
+                          src={msg.media_url} 
+                          alt="Shared image" 
+                          className="max-w-full max-h-[300px] object-contain bg-black/20"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+
+                    {(msg.message_type === 'gif' || msg.message_type === 'sticker') && (
+                      <div className="rounded-xl overflow-hidden">
+                        <img 
+                          src={msg.media_url} 
+                          alt="Sticker" 
+                          className="max-w-full max-h-[180px] object-contain transition-transform hover:scale-110"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Reply Button on Hover */}
+                  <button
+                    onClick={() => setReplyingTo({ id: Number(msg.id), content: msg.content, name: msg.user_name })}
+                    className={`p-1.5 rounded-full bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover/msg:opacity-100`}
+                    title="Reply"
+                  >
+                    <Reply size={14} />
+                  </button>
                 </div>
 
                 <span className="text-[10px] text-slate-500 mt-1 mx-1">
@@ -178,6 +204,22 @@ export default function ChatScreen() {
 
       {/* Input Area */}
       <div className="p-4 border-t border-white/10 bg-white/5 relative">
+        {/* Reply Bar */}
+        {replyingTo && (
+          <div className="mb-2 p-2 px-4 bg-accent/10 border-l-4 border-accent rounded-r-xl flex items-center justify-between animate-in slide-in-from-bottom-2">
+            <div className="overflow-hidden">
+              <p className="text-[10px] font-bold text-accent">Replying to {replyingTo.name}</p>
+              <p className="text-xs text-slate-400 truncate pr-4">{replyingTo.content}</p>
+            </div>
+            <button 
+              onClick={() => setReplyingTo(null)}
+              className="p-1 text-slate-400 hover:text-white transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         {/* Emoji Picker */}
         {isEmojiOpen && (
           <div className="absolute bottom-full right-4 mb-2 z-50">
@@ -264,7 +306,6 @@ export default function ChatScreen() {
           >
             <Smile size={20} />
           </button>
-
 
           <form 
             onSubmit={handleSend}

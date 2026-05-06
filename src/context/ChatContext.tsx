@@ -148,6 +148,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
           .eq('id', roomId)
       }
 
+
       setRoomId(null)
       setMessages([])
     } catch (error) {

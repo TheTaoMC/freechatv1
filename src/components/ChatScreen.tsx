@@ -3,13 +3,19 @@
 import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
-import { Send, Users, LogOut, MessageSquare } from 'lucide-react'
+import { createClient } from '@/utils/supabase'
+import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2 } from 'lucide-react'
+import EmojiPicker, { Theme } from 'emoji-picker-react'
 
 export default function ChatScreen() {
-  const { messages, sendMessage, leaveChat, onlineUsers } = useChat()
-  const { user } = useAuth()
+  const { messages, sendMessage, leaveChat, onlineUsers, roomId } = useChat()
+  const { user, profile } = useAuth()
   const [text, setText] = useState('')
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const supabase = createClient()
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -22,11 +28,45 @@ export default function ChatScreen() {
     if (!text.trim()) return
     const content = text
     setText('')
+    setIsEmojiOpen(false)
     await sendMessage(content)
   }
 
+  const onEmojiClick = (emojiData: any) => {
+    setText((prev) => prev + emojiData.emoji)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !roomId || !user) return
+
+    setIsUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${roomId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      
+      const { data, error } = await supabase.storage
+        .from('chat-media')
+        .upload(fileName, file)
+
+      if (error) throw error
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('chat-media')
+        .getPublicUrl(fileName)
+
+      await sendMessage('Sent an image', 'image', publicUrl)
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Failed to upload image. Make sure you created the "chat-media" bucket in Supabase and set it to Public.')
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
   return (
-    <div className="w-full max-w-4xl h-[80vh] glass-card flex flex-col overflow-hidden">
+    <div className="w-full max-w-4xl h-[85vh] glass-card flex flex-col overflow-hidden relative">
       {/* Chat Header */}
       <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/5">
         <div className="flex items-center gap-3">
@@ -52,7 +92,7 @@ export default function ChatScreen() {
       {/* Messages Area */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth"
+        className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"
       >
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-4">
@@ -74,15 +114,41 @@ export default function ChatScreen() {
                     {msg.user_name}
                   </span>
                 )}
+                
                 <div
-                  className={`max-w-[70%] px-4 py-2 rounded-2xl ${
+                  className={`max-w-[70%] group relative ${
                     isMe
-                      ? 'bg-accent text-accent-foreground rounded-tr-none'
-                      : 'bg-white/10 text-white rounded-tl-none'
-                  }`}
+                      ? 'bg-accent text-accent-foreground rounded-2xl rounded-tr-none px-4 py-2'
+                      : 'bg-white/10 text-white rounded-2xl rounded-tl-none px-4 py-2'
+                  } ${msg.message_type !== 'text' ? 'p-1' : ''}`}
                 >
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                  {msg.message_type === 'text' && (
+                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                  )}
+                  
+                  {msg.message_type === 'image' && (
+                    <div className="rounded-xl overflow-hidden">
+                      <img 
+                        src={msg.media_url} 
+                        alt="Shared image" 
+                        className="max-w-full max-h-[300px] object-contain bg-black/20"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+
+                  {msg.message_type === 'gif' && (
+                    <div className="rounded-xl overflow-hidden">
+                      <img 
+                        src={msg.media_url} 
+                        alt="GIF" 
+                        className="max-w-full max-h-[250px] object-contain bg-black/20"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
                 </div>
+
                 <span className="text-[10px] text-slate-500 mt-1 mx-1">
                   {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
@@ -93,27 +159,74 @@ export default function ChatScreen() {
       </div>
 
       {/* Input Area */}
-      <form 
-        onSubmit={handleSend}
-        className="p-4 border-t border-white/10 bg-white/5"
-      >
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Type a message..."
-            className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all placeholder:text-slate-500"
+      <div className="p-4 border-t border-white/10 bg-white/5 relative">
+        {isEmojiOpen && (
+          <div className="absolute bottom-full right-4 mb-2 z-50">
+            <div className="relative">
+               <button 
+                onClick={() => setIsEmojiOpen(false)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 z-[60] shadow-lg"
+               >
+                 <X size={14} />
+               </button>
+               <EmojiPicker 
+                onEmojiClick={onEmojiClick}
+                theme={Theme.DARK}
+                lazyLoadEmojis={true}
+               />
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImageUpload} 
+            className="hidden" 
+            accept="image/*"
           />
+          
           <button
-            type="submit"
-            disabled={!text.trim()}
-            className="absolute right-2 p-2 bg-accent text-accent-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="p-2.5 text-slate-400 hover:text-accent hover:bg-white/5 rounded-xl transition-all"
+            title="Upload Image"
           >
-            <Send size={18} />
+            {isUploading ? <Loader2 className="animate-spin" size={20} /> : <ImageIcon size={20} />}
           </button>
+
+          <button
+            onClick={() => setIsEmojiOpen(!isEmojiOpen)}
+            className={`p-2.5 rounded-xl transition-all ${isEmojiOpen ? 'text-accent bg-accent/10' : 'text-slate-400 hover:text-accent hover:bg-white/5'}`}
+            title="Emoji"
+          >
+            <Smile size={20} />
+          </button>
+
+          <form 
+            onSubmit={handleSend}
+            className="flex-1 flex items-center gap-2"
+          >
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Type a message..."
+                className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all placeholder:text-slate-500"
+              />
+              <button
+                type="submit"
+                disabled={!text.trim()}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-accent text-accent-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

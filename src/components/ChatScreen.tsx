@@ -4,15 +4,28 @@ import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/utils/supabase'
-import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2 } from 'lucide-react'
+import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2, Sticker as StickerIcon } from 'lucide-react'
 import EmojiPicker, { Theme } from 'emoji-picker-react'
+
+const STICKERS = [
+  { id: 'cat-1', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKMGpxx32LJAuS4/giphy.gif' },
+  { id: 'cat-2', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l41lTfuxV5w5eP5W8/giphy.gif' },
+  { id: 'cat-3', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKVUn7iM8FMEU24/giphy.gif' },
+  { id: 'rabbit-1', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKRnK8X8fO9o6wE/giphy.gif' },
+  { id: 'rabbit-2', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKMGpxx32LJAuS4/giphy.gif' },
+  { id: 'cool-dog', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKovvW3T6u8yJSU/giphy.gif' },
+  { id: 'heart-1', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7TKVUn7iM8FMEU24/giphy.gif' },
+  { id: 'party', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXh0Z2N0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndGZ0Z3RndCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l41lTfuxV5w5eP5W8/giphy.gif' },
+]
 
 export default function ChatScreen() {
   const { messages, sendMessage, leaveChat, onlineUsers, roomId } = useChat()
   const { user, profile } = useAuth()
   const [text, setText] = useState('')
   const [isEmojiOpen, setIsEmojiOpen] = useState(false)
+  const [isStickerOpen, setIsStickerOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
@@ -63,6 +76,11 @@ export default function ChatScreen() {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
+  }
+
+  const handleStickerSend = async (url: string) => {
+    await sendMessage('Sent a sticker', 'sticker', url)
+    setIsStickerOpen(false)
   }
 
   return (
@@ -117,17 +135,17 @@ export default function ChatScreen() {
                 
                 <div
                   className={`max-w-[70%] group relative ${
-                    isMe
-                      ? 'bg-accent text-accent-foreground rounded-2xl rounded-tr-none px-4 py-2'
-                      : 'bg-white/10 text-white rounded-2xl rounded-tl-none px-4 py-2'
-                  } ${msg.message_type !== 'text' ? 'p-1' : ''}`}
+                    msg.message_type === 'text' 
+                      ? (isMe ? 'bg-accent text-accent-foreground rounded-2xl rounded-tr-none px-4 py-2' : 'bg-white/10 text-white rounded-2xl rounded-tl-none px-4 py-2')
+                      : 'p-1'
+                  }`}
                 >
                   {msg.message_type === 'text' && (
                     <p className="text-sm leading-relaxed">{msg.content}</p>
                   )}
                   
                   {msg.message_type === 'image' && (
-                    <div className="rounded-xl overflow-hidden">
+                    <div className="rounded-xl overflow-hidden shadow-xl border border-white/10">
                       <img 
                         src={msg.media_url} 
                         alt="Shared image" 
@@ -137,12 +155,12 @@ export default function ChatScreen() {
                     </div>
                   )}
 
-                  {msg.message_type === 'gif' && (
+                  {(msg.message_type === 'gif' || msg.message_type === 'sticker') && (
                     <div className="rounded-xl overflow-hidden">
                       <img 
                         src={msg.media_url} 
-                        alt="GIF" 
-                        className="max-w-full max-h-[250px] object-contain bg-black/20"
+                        alt="Sticker" 
+                        className="max-w-full max-h-[180px] object-contain transition-transform hover:scale-110"
                         loading="lazy"
                       />
                     </div>
@@ -160,12 +178,13 @@ export default function ChatScreen() {
 
       {/* Input Area */}
       <div className="p-4 border-t border-white/10 bg-white/5 relative">
+        {/* Emoji Picker */}
         {isEmojiOpen && (
           <div className="absolute bottom-full right-4 mb-2 z-50">
             <div className="relative">
                <button 
                 onClick={() => setIsEmojiOpen(false)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 z-[60] shadow-lg"
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 z-[60] shadow-lg hover:bg-red-600 transition-colors"
                >
                  <X size={14} />
                </button>
@@ -173,7 +192,35 @@ export default function ChatScreen() {
                 onEmojiClick={onEmojiClick}
                 theme={Theme.DARK}
                 lazyLoadEmojis={true}
+                searchDisabled={true}
+                skinTonesDisabled={true}
                />
+            </div>
+          </div>
+        )}
+
+        {/* Sticker Picker */}
+        {isStickerOpen && (
+          <div className="absolute bottom-full left-4 mb-2 z-50 w-72 h-80 glass-card p-4 flex flex-col shadow-2xl animate-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-bold text-sm">Stickers</h4>
+              <button 
+                onClick={() => setIsStickerOpen(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-3 pr-1">
+              {STICKERS.map((sticker) => (
+                <button
+                  key={sticker.id}
+                  onClick={() => handleStickerSend(sticker.url)}
+                  className="p-2 hover:bg-white/10 rounded-xl transition-all transform hover:scale-110 active:scale-95"
+                >
+                  <img src={sticker.url} alt={sticker.id} className="w-full h-full object-contain" />
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -197,12 +244,27 @@ export default function ChatScreen() {
           </button>
 
           <button
-            onClick={() => setIsEmojiOpen(!isEmojiOpen)}
+            onClick={() => {
+              setIsStickerOpen(!isStickerOpen)
+              setIsEmojiOpen(false)
+            }}
+            className={`p-2.5 rounded-xl transition-all ${isStickerOpen ? 'text-accent bg-accent/10' : 'text-slate-400 hover:text-accent hover:bg-white/5'}`}
+            title="Stickers"
+          >
+            <StickerIcon size={20} />
+          </button>
+
+          <button
+            onClick={() => {
+              setIsEmojiOpen(!isEmojiOpen)
+              setIsStickerOpen(false)
+            }}
             className={`p-2.5 rounded-xl transition-all ${isEmojiOpen ? 'text-accent bg-accent/10' : 'text-slate-400 hover:text-accent hover:bg-white/5'}`}
             title="Emoji"
           >
             <Smile size={20} />
           </button>
+
 
           <form 
             onSubmit={handleSend}

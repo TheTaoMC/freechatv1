@@ -88,23 +88,27 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         const users = Object.values(state).flat()
         setOnlineUsers(users)
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('join', key, newPresences)
-      })
-      .on('presence', { event: 'leave' }, async ({ key, leftPresences }) => {
-        console.log('leave', key, leftPresences)
-        // If someone leaves, we could decrement member_count in DB here
-        // But it's better to do it via a more robust method or just rely on the count of onlineUsers
-      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await presenceChannel.track({
             user_id: user?.id,
             user_name: profile?.display_name || 'Guest',
             online_at: new Date().toISOString(),
+            last_read_id: messages.length > 0 ? messages[messages.length - 1].id : null
           })
         }
       })
+
+    // Re-track when messages change to update last_read_id
+    if (messages.length > 0) {
+        presenceChannel.track({
+            user_id: user?.id,
+            user_name: profile?.display_name || 'Guest',
+            online_at: new Date().toISOString(),
+            last_read_id: messages[messages.length - 1].id
+        })
+    }
+
 
     return () => {
       supabase.removeChannel(channel)

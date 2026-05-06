@@ -29,7 +29,38 @@ export default function ChatScreen() {
   
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const supabase = createClient()
+
+  // Request Notification Permission
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission()
+    }
+    // Initialize sound
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
+  }, [])
+
+  // Show notification for new messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1]
+      const isNotMe = lastMsg.user_id !== user?.id
+
+      if (isNotMe) {
+        // Play sound
+        audioRef.current?.play().catch(() => {})
+
+        // Show Browser Notification if tab is hidden
+        if (document.hidden && Notification.permission === "granted") {
+          new Notification(`${lastMsg.user_name} says:`, {
+            body: lastMsg.message_type === 'text' ? lastMsg.content : `Sent a ${lastMsg.message_type}`,
+            icon: '/favicon.ico'
+          })
+        }
+      }
+    }
+  }, [messages, user?.id])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -193,9 +224,27 @@ export default function ChatScreen() {
                   </button>
                 </div>
 
-                <span className="text-[10px] text-slate-500 mt-1 mx-1">
-                  {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                <div className={`flex items-center gap-2 mt-1 mx-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <span className="text-[10px] text-slate-500">
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  
+                  {isMe && (
+                    <div className="flex items-center gap-1">
+                      {(() => {
+                        const readers = onlineUsers.filter(u => u.user_id !== user?.id && u.last_read_id >= msg.id).length
+                        if (readers > 0) {
+                          return (
+                            <span className="text-[10px] text-accent font-medium flex items-center gap-0.5 animate-in fade-in">
+                              Read {readers > 1 ? `by ${readers}` : ''}
+                            </span>
+                          )
+                        }
+                        return <span className="text-[10px] text-slate-600">Sent</span>
+                      })()}
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })

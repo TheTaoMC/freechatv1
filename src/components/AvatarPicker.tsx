@@ -14,13 +14,13 @@ export const AVATAR_OPTIONS = {
     'shortHairSides', 'shortHairTheCaesar', 'shortHairTheCaesarSidePart'
   ],
   accessories: ['blank', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'],
-  hairColor: ['2c1b18', '472422', 'b58143', '724130', '4a312c', 'f59797', 'ecdcbf', 'c93305', 'e8e1e1'], // Hex colors for hair in v9
+  hairColor: ['2c1b18', '472422', 'b58143', '724130', '4a312c', 'f59797', 'ecdcbf', 'c93305', 'e8e1e1'], 
   facialHair: ['blank', 'beardMedium', 'beardLight', 'beardMajestic', 'moustacheFancy', 'moustacheMagnum'],
   clothing: ['blazerShirt', 'blazerSweater', 'collarSweater', 'graphicShirt', 'hoodie', 'overall', 'shirtVNeck'],
   eyes: ['default', 'closed', 'cry', 'dizzy', 'eyeRoll', 'happy', 'hearts', 'side', 'squint', 'surprised', 'wink', 'winkWacky'],
   eyebrows: ['default', 'angry', 'angryNatural', 'defaultNatural', 'flatNatural', 'raisedExcited', 'raisedExcitedNatural', 'sadConcerned', 'unibrowNatural', 'upDown', 'upDownNatural'],
   mouth: ['default', 'concerned', 'disbelief', 'eating', 'grimace', 'sad', 'screamOpen', 'serious', 'smile', 'tongue', 'twinkle', 'vomit'],
-  skin: ['tanned', 'yellow', 'pale', 'light', 'brown', 'darkBrown', 'black']
+  skin: ['ffdbac', 'f1c27d', 'e0ac69', '8d5524', 'c68642', 'ae703a', '2d1d19'] // Valid Hex codes for skin in v9
 }
 
 type AvatarConfig = {

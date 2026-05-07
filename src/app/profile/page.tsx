@@ -30,7 +30,7 @@ export default function ProfilePage() {
         eyes: 'default',
         eyebrows: 'default',
         mouth: 'default',
-        skin: 'light'
+        skin: 'f1c27d'
       })
     }
   }, [profile])

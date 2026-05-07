@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.4.2",
+    "@dicebear/core": "^9.4.2",
     "@giphy/js-fetch-api": "^5.8.0",
     "@giphy/react-components": "^10.1.2",
     "@supabase/ssr": "^0.10.2",

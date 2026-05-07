@@ -163,15 +163,26 @@ export default function ChatScreen() {
             return (
               <div
                 key={msg.id || i}
-                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group/msg`}
+                className={`flex items-end gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'} group/msg`}
               >
-                {!isMe && (
-                  <span className="text-xs font-medium text-slate-400 mb-1 ml-1">
-                    {msg.user_name}
-                  </span>
-                )}
-                
-                <div className={`relative flex items-center gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                {/* User Avatar */}
+                <div className="w-8 h-8 rounded-full bg-white/5 overflow-hidden flex-shrink-0 border border-white/10 shadow-lg">
+                  {(() => {
+                    const onlineUser = onlineUsers.find(u => u.user_id === msg.user_id)
+                    const avatarUrl = onlineUser?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.user_name}`
+                    return <img src={avatarUrl} alt={msg.user_name} className="w-full h-full object-contain" />
+                  })()}
+                </div>
+
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  {!isMe && (
+                    <span className="text-[10px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-widest">
+                      {msg.user_name}
+                    </span>
+                  )}
+                  
+                  <div className={`relative flex items-center gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+
                   <div
                     className={`max-w-full relative shadow-sm ${
                       msg.message_type === 'text' 

@@ -13,10 +13,10 @@ export const AVATAR_OPTIONS = {
     'shortCurly', 'shortFlat', 'shortRound', 'shortWaved',
     'sides', 'theCaesar', 'theCaesarSidePart'
   ],
-  accessories: ['blank', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'],
+  accessories: ['none', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'],
   hairColor: ['2c1b18', '472422', 'b58143', '724130', '4a312c', 'f59797', 'ecdcbf', 'c93305', 'e8e1e1'], 
-  facialHair: ['blank', 'beardMedium', 'beardLight', 'beardMajestic', 'moustacheFancy', 'moustacheMagnum'],
-  clothing: ['blazerShirt', 'blazerSweater', 'collarSweater', 'graphicShirt', 'hoodie', 'overall', 'shirtVNeck'],
+  facialHair: ['none', 'medium', 'light', 'majestic', 'fancy', 'magnum'],
+  clothing: ['blazer', 'sweater', 'shirt', 'graphicShirt', 'hoodie', 'overall', 'vNeck'],
   eyes: ['default', 'closed', 'cry', 'dizzy', 'eyeRoll', 'happy', 'hearts', 'side', 'squint', 'surprised', 'wink', 'winkWacky'],
   eyebrows: ['default', 'angry', 'angryNatural', 'defaultNatural', 'flatNatural', 'raisedExcited', 'raisedExcitedNatural', 'sadConcerned', 'unibrowNatural', 'upDown', 'upDownNatural'],
   mouth: ['default', 'concerned', 'disbelief', 'eating', 'grimace', 'sad', 'screamOpen', 'serious', 'smile', 'tongue', 'twinkle', 'vomit'],

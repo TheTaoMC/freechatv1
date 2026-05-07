@@ -23,10 +23,10 @@ export default function ProfilePage() {
       setDisplayName(profile.display_name || '')
       setAvatarConfig(profile.avatar_config || {
         top: 'shortFlat',
-        accessories: 'blank',
+        accessories: 'none',
         hairColor: '2c1b18',
-        facialHair: 'blank',
-        clothing: 'blazerShirt',
+        facialHair: 'none',
+        clothing: 'blazer',
         eyes: 'default',
         eyebrows: 'default',
         mouth: 'default',

@@ -97,11 +97,20 @@ export default function AvatarPicker({ config, onChange }: AvatarPickerProps) {
 }
 
 export function getAvatarUrl(config: any) {
-  if (!config) return `https://api.dicebear.com/7.x/avataaars/svg?seed=default`
-  
+  // Use a fallback seed if config is missing
+  const seed = config?.seed || 'default'
   const params = new URLSearchParams()
-  Object.entries(config).forEach(([key, value]) => {
-    params.append(key, value as string)
-  })
-  return `https://api.dicebear.com/7.x/avataaars/svg?${params.toString()}`
+  
+  if (config) {
+    Object.entries(config).forEach(([key, value]) => {
+      if (key === 'seed') return
+      // DiceBear 7.x+ uses skinColor instead of skin
+      const paramKey = key === 'skin' ? 'skinColor' : key
+      params.append(paramKey, value as string)
+    })
+  }
+  
+  // Use DiceBear 9.x for latest features and better stability
+  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&${params.toString()}`
 }
+

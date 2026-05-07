@@ -109,12 +109,17 @@ export default function ProfilePage() {
 
               {/* DEBUG TEST IMAGE */}
               <div className="p-2 bg-white/5 rounded-lg border border-dashed border-white/20">
-                <p className="text-[10px] text-slate-500 mb-2 uppercase">Debug: Hardcoded Test</p>
-                <img 
-                  src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix" 
-                  alt="Test Felix" 
-                  className="w-12 h-12 mx-auto rounded-full bg-white/10" 
-                />
+                <p className="text-[10px] text-slate-500 mb-2 uppercase">Debug Tools</p>
+                <div className="flex flex-col gap-2">
+                  <img 
+                    src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix" 
+                    alt="Test Felix" 
+                    className="w-12 h-12 mx-auto rounded-full bg-white/10" 
+                  />
+                  <div className="text-[8px] text-slate-500 break-all bg-black/20 p-2 rounded select-all">
+                    {getAvatarUrl(avatarConfig)}
+                  </div>
+                </div>
               </div>
 
               <div>

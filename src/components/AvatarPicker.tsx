@@ -97,24 +97,38 @@ export default function AvatarPicker({ config, onChange }: AvatarPickerProps) {
 }
 
 export function getAvatarUrl(config: any) {
-  const seed = config?.seed || 'custom'
+  // Use a fallback seed
+  const seed = config?.seed || 'custom-user-' + Math.random().toString(36).substring(7)
+  
+  if (!config) {
+    return `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`
+  }
+
   const params = new URLSearchParams()
   
-  if (config) {
-    Object.entries(config).forEach(([key, value]) => {
-      if (key === 'seed') return
-      
-      // Mapping to DiceBear v9 parameter names
-      let paramKey = key
-      if (key === 'skin') paramKey = 'skinColor'
-      if (key === 'hairColor') paramKey = 'hairColor'
-      
-      // Ensure color values are passed correctly (DiceBear v9 uses arrays or strings)
-      params.append(paramKey, value as string)
-    })
+  // Only add params that are definitely supported in v9
+  const supportedParams: Record<string, string> = {
+    top: 'top',
+    accessories: 'accessories',
+    hairColor: 'hairColor',
+    facialHair: 'facialHair',
+    clothing: 'clothing',
+    eyes: 'eyes',
+    eyebrows: 'eyebrows',
+    mouth: 'mouth',
+    skin: 'skinColor'
   }
+
+  Object.entries(config).forEach(([key, value]) => {
+    if (supportedParams[key] && value && value !== 'blank' && value !== 'Blank') {
+      params.append(supportedParams[key], value as string)
+    }
+  })
   
-  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&${params.toString()}`
+  const finalUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&${params.toString()}`
+  console.log('Generated Avatar URL:', finalUrl)
+  return finalUrl
 }
+
 
 

@@ -22,7 +22,7 @@ export default function ProfilePage() {
     if (profile) {
       setDisplayName(profile.display_name || '')
       setAvatarConfig(profile.avatar_config || {
-        top: 'shortHairShortFlat',
+        top: 'shortFlat',
         accessories: 'blank',
         hairColor: '2c1b18',
         facialHair: 'blank',

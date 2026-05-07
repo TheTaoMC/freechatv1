@@ -5,13 +5,13 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 export const AVATAR_OPTIONS = {
   top: [
-    'noHair', 'eyepatch', 'hat', 'hijab', 'turban', 'winterHat1', 'winterHat2', 'winterHat3', 'winterHat4',
-    'longHairBigHair', 'longHairBob', 'longHairBun', 'longHairCurly', 'longHairCurvy', 'longHairDreads',
-    'longHairFrida', 'longHairFro', 'longHairFroBand', 'longHairNotTooLong', 'longHairShavedSides',
-    'longHairMiaWallace', 'longHairStraight', 'longHairStraight2', 'longHairStraightStrand',
-    'shortHairDreads01', 'shortHairDreads02', 'shortHairFrizzle', 'shortHairShaggyMullet',
-    'shortHairShortCurly', 'shortHairShortFlat', 'shortHairShortRound', 'shortHairShortWaved',
-    'shortHairSides', 'shortHairTheCaesar', 'shortHairTheCaesarSidePart'
+    'none', 'eyepatch', 'hat', 'hijab', 'turban', 'winterHat1', 'winterHat2', 'winterHat3', 'winterHat4',
+    'bigHair', 'bob', 'bun', 'curly', 'curvy', 'dreads',
+    'frida', 'fro', 'froBand', 'longHair', 'shavedSides',
+    'miaWallace', 'straight', 'straight2', 'straightStrand',
+    'dreads01', 'dreads02', 'frizzle', 'shaggyMullet',
+    'shortCurly', 'shortFlat', 'shortRound', 'shortWaved',
+    'sides', 'theCaesar', 'theCaesarSidePart'
   ],
   accessories: ['blank', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'],
   hairColor: ['2c1b18', '472422', 'b58143', '724130', '4a312c', 'f59797', 'ecdcbf', 'c93305', 'e8e1e1'], 

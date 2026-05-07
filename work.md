@@ -41,22 +41,24 @@ Note: Use Supabase Presence to detect unexpected disconnects (closing the tab).
 4. Chat Features
 - Real-time messaging within the assigned room_id.
 - **Media Support**: Support for sending images (via Supabase Storage), emojis, and built-in stickers.
-- **Optimized UI**: Group chat interface designed for up to 5 people with message type rendering (text, image, sticker).
-- **Session Persistence**: Messages are stored in the database but managed by room lifecycle.
+- **Reply System**: Contextual message replies showing original message and sender name.
+- **Presence Indicators**: Real-time "Read Receipts" (Read by X) and online user list with custom avatars.
+- **Notifications**: Browser Web Notifications and sound alerts for incoming messages when inactive.
+- **Optimized UI**: Group chat interface designed for up to 5 people with complex message type rendering.
 
 5. UI/UX Expectations
 - Clean, modern interface using **Glassmorphism** design and Tailwind CSS.
+- **Custom Avatar System**: Detailed user customization (Head, Face, Accessories, Clothing) powered by DiceBear.
 - Responsive design (Mobile-friendly).
-- Clear state indicators (Connecting, Finding Room, Chatting).
 - Smooth animations and transitions for a premium feel.
 
 6. Technical Implementation Details (Completed)
-- **Database Schema**: Profiles, Rooms, and Messages tables with RLS enabled.
-- **Matchmaking**: Atomic SQL Function (`join_available_room`) to handle concurrent joins safely.
-- **Auto-Cleanup**: SQL Trigger (`delete_empty_rooms`) that automatically deletes the room and its messages when `member_count` reaches 0.
-- **Auth**: Supports Google OAuth and Anonymous Guest login (Supabase Auth).
-- **Real-time**: Powered by Supabase Realtime Broadcast and Presence.
-- **Storage**: Supabase Storage bucket (`chat-media`) for image uploads.
+- **Database Schema**: Profiles (with `avatar_config`), Rooms, and Messages tables.
+- **Matchmaking**: Atomic SQL Function (`join_available_room`) for safe concurrent joins.
+- **Auto-Cleanup**: SQL Trigger (`delete_empty_rooms`) for automatic room and message deletion.
+- **Avatar Engine**: DiceBear Avataaars integration via dynamic URL generation.
+- **Real-time**: Supabase Realtime Broadcast, Presence (tracking `last_read_id` and `avatar_url`).
+- **Storage**: Supabase Storage for image uploads.
 
 ---
-*Status: All core features implemented and deployed to Vercel.*
+*Status: All premium features implemented and documented.*

@@ -262,6 +262,7 @@ export default function ChatScreen() {
         )}
       </div>
 
+
       {/* Input Area */}
       <div className="p-4 border-t border-white/10 bg-white/5 relative">
         {/* Reply Bar */}

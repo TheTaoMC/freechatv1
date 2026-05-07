@@ -22,15 +22,15 @@ export default function ProfilePage() {
     if (profile) {
       setDisplayName(profile.display_name || '')
       setAvatarConfig(profile.avatar_config || {
-        top: 'ShortHairShortFlat',
-        accessories: 'Blank',
-        hairColor: 'Black',
-        facialHair: 'Blank',
-        clothing: 'BlazerShirt',
-        eyes: 'Default',
-        eyebrows: 'Default',
-        mouth: 'Default',
-        skin: 'Light'
+        top: 'shortHairShortFlat',
+        accessories: 'blank',
+        hairColor: '2c1b18',
+        facialHair: 'blank',
+        clothing: 'blazerShirt',
+        eyes: 'default',
+        eyebrows: 'default',
+        mouth: 'default',
+        skin: 'light'
       })
     }
   }, [profile])

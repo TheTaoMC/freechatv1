@@ -5,22 +5,22 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 export const AVATAR_OPTIONS = {
   top: [
-    'NoHair', 'Eyepatch', 'Hat', 'Hijab', 'Turban', 'WinterHat1', 'WinterHat2', 'WinterHat3', 'WinterHat4',
-    'LongHairBigHair', 'LongHairBob', 'LongHairBun', 'LongHairCurly', 'LongHairCurvy', 'LongHairDreads',
-    'LongHairFrida', 'LongHairFro', 'LongHairFroBand', 'LongHairNotTooLong', 'LongHairShavedSides',
-    'LongHairMiaWallace', 'LongHairStraight', 'LongHairStraight2', 'LongHairStraightStrand',
-    'ShortHairDreads01', 'ShortHairDreads02', 'ShortHairFrizzle', 'ShortHairShaggyMullet',
-    'ShortHairShortCurly', 'ShortHairShortFlat', 'ShortHairShortRound', 'ShortHairShortWaved',
-    'ShortHairSides', 'ShortHairTheCaesar', 'ShortHairTheCaesarSidePart'
+    'noHair', 'eyepatch', 'hat', 'hijab', 'turban', 'winterHat1', 'winterHat2', 'winterHat3', 'winterHat4',
+    'longHairBigHair', 'longHairBob', 'longHairBun', 'longHairCurly', 'longHairCurvy', 'longHairDreads',
+    'longHairFrida', 'longHairFro', 'longHairFroBand', 'longHairNotTooLong', 'longHairShavedSides',
+    'longHairMiaWallace', 'longHairStraight', 'longHairStraight2', 'longHairStraightStrand',
+    'shortHairDreads01', 'shortHairDreads02', 'shortHairFrizzle', 'shortHairShaggyMullet',
+    'shortHairShortCurly', 'shortHairShortFlat', 'shortHairShortRound', 'shortHairShortWaved',
+    'shortHairSides', 'shortHairTheCaesar', 'shortHairTheCaesarSidePart'
   ],
-  accessories: ['Blank', 'Kurt', 'Prescription01', 'Prescription02', 'Round', 'Sunglasses', 'Wayfarers'],
-  hairColor: ['Black', 'Blonde', 'BlondeGolden', 'Brown', 'BrownDark', 'PastelPink', 'Platinum', 'Red', 'SilverGray'],
-  facialHair: ['Blank', 'BeardMedium', 'BeardLight', 'BeardMajestic', 'MoustacheFancy', 'MoustacheMagnum'],
-  clothing: ['BlazerShirt', 'BlazerSweater', 'CollarSweater', 'GraphicShirt', 'Hoodie', 'Overall', 'ShirtVNeck'],
-  eyes: ['Default', 'Close', 'Cry', 'Dizzy', 'EyeRoll', 'Happy', 'Hearts', 'Side', 'Squint', 'Surprised', 'Wink', 'WinkWacky'],
-  eyebrows: ['Default', 'Angry', 'AngryNatural', 'DefaultNatural', 'FlatNatural', 'RaisedExcited', 'RaisedExcitedNatural', 'SadConcerned', 'UnibrowNatural', 'UpDown', 'UpDownNatural'],
-  mouth: ['Default', 'Concerned', 'Disbelief', 'Eating', 'Grimace', 'Sad', 'ScreamOpen', 'Serious', 'Smile', 'Tongue', 'Twinkle', 'Vomit'],
-  skin: ['Tanned', 'Yellow', 'Pale', 'Light', 'Brown', 'DarkBrown', 'Black']
+  accessories: ['blank', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'],
+  hairColor: ['2c1b18', '472422', 'b58143', '724130', '4a312c', 'f59797', 'ecdcbf', 'c93305', 'e8e1e1'], // Hex colors for hair in v9
+  facialHair: ['blank', 'beardMedium', 'beardLight', 'beardMajestic', 'moustacheFancy', 'moustacheMagnum'],
+  clothing: ['blazerShirt', 'blazerSweater', 'collarSweater', 'graphicShirt', 'hoodie', 'overall', 'shirtVNeck'],
+  eyes: ['default', 'closed', 'cry', 'dizzy', 'eyeRoll', 'happy', 'hearts', 'side', 'squint', 'surprised', 'wink', 'winkWacky'],
+  eyebrows: ['default', 'angry', 'angryNatural', 'defaultNatural', 'flatNatural', 'raisedExcited', 'raisedExcitedNatural', 'sadConcerned', 'unibrowNatural', 'upDown', 'upDownNatural'],
+  mouth: ['default', 'concerned', 'disbelief', 'eating', 'grimace', 'sad', 'screamOpen', 'serious', 'smile', 'tongue', 'twinkle', 'vomit'],
+  skin: ['tanned', 'yellow', 'pale', 'light', 'brown', 'darkBrown', 'black']
 }
 
 type AvatarConfig = {
@@ -97,20 +97,24 @@ export default function AvatarPicker({ config, onChange }: AvatarPickerProps) {
 }
 
 export function getAvatarUrl(config: any) {
-  // Use a fallback seed if config is missing
-  const seed = config?.seed || 'default'
+  const seed = config?.seed || 'custom'
   const params = new URLSearchParams()
   
   if (config) {
     Object.entries(config).forEach(([key, value]) => {
       if (key === 'seed') return
-      // DiceBear 7.x+ uses skinColor instead of skin
-      const paramKey = key === 'skin' ? 'skinColor' : key
+      
+      // Mapping to DiceBear v9 parameter names
+      let paramKey = key
+      if (key === 'skin') paramKey = 'skinColor'
+      if (key === 'hairColor') paramKey = 'hairColor'
+      
+      // Ensure color values are passed correctly (DiceBear v9 uses arrays or strings)
       params.append(paramKey, value as string)
     })
   }
   
-  // Use DiceBear 9.x for latest features and better stability
   return `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&${params.toString()}`
 }
+
 

@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase'
 import { useAuth } from './AuthContext'
+import { getAvatarUrl } from '@/components/AvatarPicker'
+
 
 type Message = {
   id: string

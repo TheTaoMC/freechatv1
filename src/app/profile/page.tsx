@@ -107,6 +107,16 @@ export default function ProfilePage() {
                 </button>
               </div>
 
+              {/* DEBUG TEST IMAGE */}
+              <div className="p-2 bg-white/5 rounded-lg border border-dashed border-white/20">
+                <p className="text-[10px] text-slate-500 mb-2 uppercase">Debug: Hardcoded Test</p>
+                <img 
+                  src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix" 
+                  alt="Test Felix" 
+                  className="w-12 h-12 mx-auto rounded-full bg-white/10" 
+                />
+              </div>
+
               <div>
                 <h2 className="text-2xl font-bold">Profile Settings</h2>
                 <p className="text-slate-400 text-sm">Customize your name and appearance.</p>

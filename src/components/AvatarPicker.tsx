@@ -119,8 +119,15 @@ export function getAvatarUrl(config: any) {
   }
 
   Object.entries(config).forEach(([key, value]) => {
-    if (supportedParams[key] && value && value !== 'blank' && value !== 'Blank') {
-      params.append(supportedParams[key], value as string)
+    const isNone = value === 'none' || value === 'None' || value === 'blank' || value === 'Blank'
+    
+    if (supportedParams[key]) {
+      if (isNone) {
+        // If 'none' is selected, set probability to 0 to ensure it's hidden
+        params.append(`${supportedParams[key]}Probability`, '0')
+      } else if (value) {
+        params.append(supportedParams[key], value as string)
+      }
     }
   })
   

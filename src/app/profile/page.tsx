@@ -26,11 +26,11 @@ export default function ProfilePage() {
         accessories: 'none',
         hairColor: '2c1b18',
         facialHair: 'none',
-        clothing: 'blazer',
+        clothing: 'blazerAndShirt',
         eyes: 'default',
         eyebrows: 'default',
         mouth: 'default',
-        skin: 'f1c27d'
+        skin: 'edb98a'
       })
     }
   }, [profile])

@@ -5,22 +5,21 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 export const AVATAR_OPTIONS = {
   top: [
-    'none', 'eyepatch', 'hat', 'hijab', 'turban', 'winterHat1', 'winterHat2', 'winterHat3', 'winterHat4',
-    'bigHair', 'bob', 'bun', 'curly', 'curvy', 'dreads',
-    'frida', 'fro', 'froBand', 'longHair', 'shavedSides',
-    'miaWallace', 'straight', 'straight2', 'straightStrand',
-    'dreads01', 'dreads02', 'frizzle', 'shaggyMullet',
-    'shortCurly', 'shortFlat', 'shortRound', 'shortWaved',
-    'sides', 'theCaesar', 'theCaesarSidePart'
+    'bigHair', 'bob', 'bun', 'curly', 'curvy', 'dreads', 'frida', 'fro', 'froBand', 
+    'longButNotTooLong', 'miaWallace', 'shavedSides', 'straight01', 'straight02', 
+    'straightAndStrand', 'dreads01', 'dreads02', 'frizzle', 'shaggy', 'shaggyMullet', 
+    'shortCurly', 'shortFlat', 'shortRound', 'shortWaved', 'sides', 'theCaesar', 
+    'theCaesarAndSidePart', 'hat', 'hijab', 'turban', 'winterHat1', 'winterHat02', 
+    'winterHat03', 'winterHat04'
   ],
-  accessories: ['none', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'],
-  hairColor: ['2c1b18', '472422', 'b58143', '724130', '4a312c', 'f59797', 'ecdcbf', 'c93305', 'e8e1e1'], 
-  facialHair: ['none', 'medium', 'light', 'majestic', 'fancy', 'magnum'],
-  clothing: ['blazer', 'sweater', 'shirt', 'graphicShirt', 'hoodie', 'overall', 'vNeck'],
-  eyes: ['default', 'closed', 'cry', 'dizzy', 'eyeRoll', 'happy', 'hearts', 'side', 'squint', 'surprised', 'wink', 'winkWacky'],
-  eyebrows: ['default', 'angry', 'angryNatural', 'defaultNatural', 'flatNatural', 'raisedExcited', 'raisedExcitedNatural', 'sadConcerned', 'unibrowNatural', 'upDown', 'upDownNatural'],
+  accessories: ['none', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers', 'eyepatch'],
+  hairColor: ['a55728', '2c1b18', 'b58143', 'd6b370', '724133', '4a312c', 'f59797', 'ecdcbf', 'c93305', 'e8e1e1'], 
+  facialHair: ['none', 'beardLight', 'beardMajestic', 'beardMedium', 'moustacheFancy', 'moustacheMagnum'],
+  clothing: ['blazerAndShirt', 'blazerAndSweater', 'collarAndSweater', 'graphicShirt', 'hoodie', 'overall', 'shirtCrewNeck', 'shirtScoopNeck', 'shirtVNeck'],
+  eyes: ['default', 'closed', 'cry', 'eyeRoll', 'happy', 'hearts', 'side', 'squint', 'surprised', 'winkWacky', 'wink', 'xDizzy'],
+  eyebrows: ['default', 'angry', 'angryNatural', 'defaultNatural', 'flatNatural', 'frownNatural', 'raisedExcited', 'raisedExcitedNatural', 'sadConcerned', 'sadConcernedNatural', 'unibrowNatural', 'upDown', 'upDownNatural'],
   mouth: ['default', 'concerned', 'disbelief', 'eating', 'grimace', 'sad', 'screamOpen', 'serious', 'smile', 'tongue', 'twinkle', 'vomit'],
-  skin: ['ffdbac', 'f1c27d', 'e0ac69', '8d5524', 'c68642', 'ae703a', '2d1d19'] // Valid Hex codes for skin in v9
+  skin: ['614335', 'd08b5b', 'ae5d29', 'edb98a', 'ffdbb4', 'fd9841', 'f8d25c']
 }
 
 type AvatarConfig = {

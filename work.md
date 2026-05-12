@@ -56,9 +56,14 @@ Note: Use Supabase Presence to detect unexpected disconnects (closing the tab).
 - **Database Schema**: Profiles (with `avatar_config`), Rooms, and Messages tables.
 - **Matchmaking**: Atomic SQL Function (`join_available_room`) for safe concurrent joins.
 - **Auto-Cleanup**: SQL Trigger (`delete_empty_rooms`) for automatic room and message deletion.
-- **Avatar Engine**: DiceBear Avataaars integration via dynamic URL generation.
+- **Avatar Engine**: Integrated DiceBear Avataaars (v9) with custom Hex-color mapping and short-name parameters for maximum compatibility.
 - **Real-time**: Supabase Realtime Broadcast, Presence (tracking `last_read_id` and `avatar_url`).
 - **Storage**: Supabase Storage for image uploads.
 
+7. Future Enhancements & Roadmap
+- **Custom Hand-Drawn Avatars**: Support for layered PNG rendering (Skin -> Clothing -> Face -> Hair) to allow unique community art and self-drawn assets.
+- **Voice Messaging**: Implementation of audio recording and playback within the chat.
+- **Giphy Integration**: Direct search and send for dynamic GIFs/Stickers using Giphy API.
+
 ---
-*Status: All premium features implemented and documented.*
+*Status: All premium features implemented and documented. System stable on DiceBear v9.*

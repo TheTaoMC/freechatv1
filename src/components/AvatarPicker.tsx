@@ -96,8 +96,8 @@ export default function AvatarPicker({ config, onChange }: AvatarPickerProps) {
 }
 
 export function getAvatarUrl(config: any) {
-  // Use a fallback seed
-  const seed = config?.seed || 'custom-user-' + Math.random().toString(36).substring(7)
+  // Use a stable fallback seed to prevent randomization on re-render
+  const seed = config?.seed || 'custom-avatar-seed'
   
   if (!config) {
     return `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`

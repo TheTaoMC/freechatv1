@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/utils/supabase'
-import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2, Sticker as StickerIcon, Reply } from 'lucide-react'
+import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2, Sticker as StickerIcon, Reply, Volume2, VolumeX } from 'lucide-react'
 import EmojiPicker, { Theme } from 'emoji-picker-react'
 
 const STICKERS = [
@@ -25,7 +25,14 @@ export default function ChatScreen() {
   const [isEmojiOpen, setIsEmojiOpen] = useState(false)
   const [isStickerOpen, setIsStickerOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true)
   const [replyingTo, setReplyingTo] = useState<{ id: number, content: string, name: string } | null>(null)
+  
+  const toggleSound = () => {
+    const newState = !isSoundEnabled
+    setIsSoundEnabled(newState)
+    localStorage.setItem('chat_sound_enabled', String(newState))
+  }
   
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -33,13 +40,20 @@ export default function ChatScreen() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const supabase = createClient()
 
-  // Request Notification Permission
+  // Request Notification Permission & Initialize Sound
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission()
     }
-    // Initialize sound
-    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
+    
+    // Load sound setting from localStorage
+    const savedSound = localStorage.getItem('chat_sound_enabled')
+    if (savedSound !== null) {
+      setIsSoundEnabled(savedSound === 'true')
+    }
+
+    // Initialize sound with the custom file
+    audioRef.current = new Audio('/notification.mp3')
   }, [])
 
   // Show notification for new messages
@@ -49,8 +63,10 @@ export default function ChatScreen() {
       const isNotMe = lastMsg.user_id !== user?.id
 
       if (isNotMe) {
-        // Play sound
-        audioRef.current?.play().catch(() => {})
+        // Play sound if enabled
+        if (isSoundEnabled) {
+          audioRef.current?.play().catch(() => {})
+        }
 
         // Show Browser Notification if tab is hidden
         if (document.hidden && Notification.permission === "granted") {
@@ -137,13 +153,24 @@ export default function ChatScreen() {
             </p>
           </div>
         </div>
-        <button
-          onClick={leaveChat}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all"
-        >
-          <LogOut size={16} />
-          Leave
-        </button>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleSound}
+            className={`p-2 rounded-lg transition-all ${isSoundEnabled ? 'text-accent hover:bg-accent/10' : 'text-slate-500 hover:bg-white/5'}`}
+            title={isSoundEnabled ? 'Disable Sound' : 'Enable Sound'}
+          >
+            {isSoundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+          </button>
+          
+          <button
+            onClick={leaveChat}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+          >
+            <LogOut size={16} />
+            Leave
+          </button>
+        </div>
       </div>
 
       {/* Messages Area */}

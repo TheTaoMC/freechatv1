@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/utils/supabase'
-import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2, Sticker as StickerIcon, Reply, Volume2, VolumeX } from 'lucide-react'
+import { Send, Users, LogOut, MessageSquare, Image as ImageIcon, Smile, Gift, X, Loader2, Sticker as StickerIcon, Reply, Volume2, VolumeX, Copy, Check, Search } from 'lucide-react'
 import EmojiPicker, { Theme } from 'emoji-picker-react'
 
 const STICKERS = [
@@ -19,7 +19,7 @@ const STICKERS = [
 ]
 
 export default function ChatScreen() {
-  const { messages, sendMessage, leaveChat, onlineUsers, roomId } = useChat()
+  const { messages, sendMessage, leaveChat, onlineUsers, roomId, typingUsers, setTypingStatus, addReaction, removeReaction } = useChat()
   const { user, profile } = useAuth()
   const [text, setText] = useState('')
   const [isEmojiOpen, setIsEmojiOpen] = useState(false)
@@ -27,6 +27,37 @@ export default function ChatScreen() {
   const [isUploading, setIsUploading] = useState(false)
   const [isSoundEnabled, setIsSoundEnabled] = useState(true)
   const [replyingTo, setReplyingTo] = useState<{ id: number, content: string, name: string } | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [isGiphyOpen, setIsGiphyOpen] = useState(false)
+  const [giphySearch, setGiphySearch] = useState('')
+  const [gifs, setGifs] = useState<any[]>([])
+
+  const copyRoomId = () => {
+    if (!roomId) return
+    navigator.clipboard.writeText(roomId)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const fetchGifs = async (query: string) => {
+    try {
+      const endpoint = query 
+        ? `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${encodeURIComponent(query)}&limit=20`
+        : `https://api.giphy.com/v1/gifs/trending?api_key=dc6zaTOxFJmzC&limit=20`
+      
+      const res = await fetch(endpoint)
+      const { data } = await res.json()
+      setGifs(data)
+    } catch (err) {
+      console.error('Error fetching gifs:', err)
+    }
+  }
+
+  useEffect(() => {
+    if (isGiphyOpen) {
+      fetchGifs(giphySearch)
+    }
+  }, [isGiphyOpen, giphySearch])
   
   const toggleSound = () => {
     const newState = !isSoundEnabled
@@ -84,6 +115,12 @@ export default function ChatScreen() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages])
+
+  useEffect(() => {
+    if (text.trim()) {
+      setTypingStatus(true)
+    }
+  }, [text])
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -146,9 +183,22 @@ export default function ChatScreen() {
           <div className="p-2 bg-accent/10 rounded-lg text-accent">
             <Users size={20} />
           </div>
-          <div>
-            <h3 className="font-bold">Group Chat</h3>
-            <p className="text-xs text-slate-400">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm md:text-base">Group Chat</h3>
+              {roomId && (
+                <button 
+                  onClick={copyRoomId}
+                  className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                  title="Click to copy Room ID"
+                >
+                  {copied ? <Check size={10} className="text-green-400" /> : <Copy size={10} />}
+                  <span className="font-mono hidden md:inline">{roomId.slice(0, 8)}...</span>
+                  <span className="font-mono md:hidden">ID</span>
+                </button>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400">
               {onlineUsers.length} people online
             </p>
           </div>
@@ -211,92 +261,144 @@ export default function ChatScreen() {
                   
                   <div className={`relative flex items-center gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
 
-                  <div
-                    className={`max-w-full relative shadow-sm ${
-                      msg.message_type === 'text' 
-                        ? (isMe ? 'bg-accent text-accent-foreground rounded-2xl rounded-tr-none px-4 py-2' : 'bg-white/10 text-white rounded-2xl rounded-tl-none px-4 py-2')
-                        : 'p-1'
-                    }`}
-                  >
-                    {/* Reply Preview in Bubble */}
-                    {msg.reply_to_id && (
-                      <div className={`text-[10px] mb-1 p-2 rounded-lg bg-black/20 border-l-2 border-accent/50 ${isMe ? 'text-accent-foreground/80' : 'text-slate-300'}`}>
-                        <p className="font-bold opacity-70">{msg.reply_to_name}</p>
-                        <p className="truncate max-w-[200px]">{msg.reply_to_content}</p>
+                    <div
+                      className={`max-w-full relative shadow-sm ${
+                        msg.message_type === 'text' 
+                          ? (isMe ? 'bg-accent text-accent-foreground rounded-2xl rounded-tr-none px-4 py-2' : 'bg-white/10 text-white rounded-2xl rounded-tl-none px-4 py-2')
+                          : 'p-1'
+                      }`}
+                    >
+                      {/* Quick Reactions Picker on Hover */}
+                      <div className={`absolute -top-10 ${isMe ? 'right-0' : 'left-0'} opacity-0 group-hover/msg:opacity-100 transition-all z-20 flex gap-1 bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-white/10 shadow-2xl mb-1 pointer-events-none group-hover/msg:pointer-events-auto`}>
+                        {['❤️', '😂', '😮', '😢', '🔥', '👍'].map(emoji => (
+                          <button
+                            key={emoji}
+                            onClick={() => addReaction(Number(msg.id), emoji)}
+                            className="hover:scale-150 transition-transform p-1 text-base duration-200 active:scale-95"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
                       </div>
-                    )}
 
-                    {msg.message_type === 'text' && (
-                      <p className="text-sm leading-relaxed">{msg.content}</p>
-                    )}
+                      {/* Reply Preview in Bubble */}
+                      {msg.reply_to_id && (
+                        <div className={`text-[10px] mb-1 p-2 rounded-lg bg-black/20 border-l-2 border-accent/50 ${isMe ? 'text-accent-foreground/80' : 'text-slate-300'}`}>
+                          <p className="font-bold opacity-70">{msg.reply_to_name}</p>
+                          <p className="truncate max-w-[200px]">{msg.reply_to_content}</p>
+                        </div>
+                      )}
+
+                      {msg.message_type === 'text' && (
+                        <p className="text-sm leading-relaxed">{msg.content}</p>
+                      )}
+                      
+                      {msg.message_type === 'image' && (
+                        <div className="rounded-xl overflow-hidden shadow-xl border border-white/10">
+                          <img 
+                            src={msg.media_url} 
+                            alt="Shared image" 
+                            className="max-w-full max-h-[300px] object-contain bg-black/20"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
+                      {(msg.message_type === 'gif' || msg.message_type === 'sticker') && (
+                        <div className="rounded-xl overflow-hidden">
+                          <img 
+                            src={msg.media_url} 
+                            alt="Sticker" 
+                            className="max-w-full max-h-[180px] object-contain transition-transform hover:scale-110"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
+                      {/* Reactions Display */}
+                      {msg.reactions && msg.reactions.length > 0 && (
+                        <div className={`flex flex-wrap gap-1 mt-1.5 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                          {Object.entries(
+                            msg.reactions.reduce((acc: Record<string, number>, curr) => {
+                              acc[curr.emoji] = (acc[curr.emoji] || 0) + 1
+                              return acc
+                            }, {})
+                          ).map(([emoji, count]) => {
+                            const hasReacted = msg.reactions?.some(r => r.user_id === user?.id && r.emoji === emoji)
+                            return (
+                              <button
+                                key={emoji}
+                                onClick={() => hasReacted ? removeReaction(Number(msg.id), emoji) : addReaction(Number(msg.id), emoji)}
+                                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-all ${
+                                  hasReacted ? 'bg-accent/30 border-accent/50 text-accent shadow-sm' : 'bg-white/5 border-white/10 text-slate-400'
+                                } border hover:scale-110 active:scale-95`}
+                              >
+                                <span>{emoji}</span>
+                                <span className="font-bold">{count}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Reply Button on Hover */}
+                    <button
+                      onClick={() => {
+                        setReplyingTo({ id: Number(msg.id), content: msg.content, name: msg.user_name })
+                        textInputRef.current?.focus()
+                      }}
+                      className={`p-1.5 rounded-full bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover/msg:opacity-100`}
+                      title="Reply"
+                    >
+                      <Reply size={14} />
+                    </button>
+                  </div>
+
+                  <div className={`flex items-center gap-2 mt-1 mx-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <span className="text-[10px] text-slate-500">
+                      {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                     
-                    {msg.message_type === 'image' && (
-                      <div className="rounded-xl overflow-hidden shadow-xl border border-white/10">
-                        <img 
-                          src={msg.media_url} 
-                          alt="Shared image" 
-                          className="max-w-full max-h-[300px] object-contain bg-black/20"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
-
-                    {(msg.message_type === 'gif' || msg.message_type === 'sticker') && (
-                      <div className="rounded-xl overflow-hidden">
-                        <img 
-                          src={msg.media_url} 
-                          alt="Sticker" 
-                          className="max-w-full max-h-[180px] object-contain transition-transform hover:scale-110"
-                          loading="lazy"
-                        />
+                    {isMe && (
+                      <div className="flex items-center gap-1">
+                        {(() => {
+                          const readers = onlineUsers.filter(u => u.user_id !== user?.id && u.last_read_id >= msg.id).length
+                          if (readers > 0) {
+                            return (
+                              <span className="text-[10px] text-accent font-medium flex items-center gap-0.5 animate-in fade-in">
+                                Read {readers > 1 ? `by ${readers}` : ''}
+                              </span>
+                            )
+                          }
+                          return <span className="text-[10px] text-slate-600">Sent</span>
+                        })()}
                       </div>
                     )}
                   </div>
-
-                  {/* Reply Button on Hover */}
-                  <button
-                    onClick={() => {
-                      setReplyingTo({ id: Number(msg.id), content: msg.content, name: msg.user_name })
-                      textInputRef.current?.focus()
-                    }}
-                    className={`p-1.5 rounded-full bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover/msg:opacity-100`}
-                    title="Reply"
-                  >
-                    <Reply size={14} />
-                  </button>
-                </div>
-
-                <div className={`flex items-center gap-2 mt-1 mx-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <span className="text-[10px] text-slate-500">
-                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  
-                  {isMe && (
-                    <div className="flex items-center gap-1">
-                      {(() => {
-                        const readers = onlineUsers.filter(u => u.user_id !== user?.id && u.last_read_id >= msg.id).length
-                        if (readers > 0) {
-                          return (
-                            <span className="text-[10px] text-accent font-medium flex items-center gap-0.5 animate-in fade-in">
-                              Read {readers > 1 ? `by ${readers}` : ''}
-                            </span>
-                          )
-                        }
-                        return <span className="text-[10px] text-slate-600">Sent</span>
-                      })()}
-                    </div>
-                  )}
                 </div>
               </div>
-            </div>
-          )
-        })
+            )
+          })
         )}
       </div>
 
-
       {/* Input Area */}
       <div className="p-4 border-t border-white/10 bg-white/5 relative">
+        {/* Typing Indicator UI */}
+        {Object.keys(typingUsers).length > 0 && (
+          <div className="absolute -top-7 left-6 px-3 py-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300">
+            <p className="text-[10px] text-accent font-medium italic flex items-center gap-2">
+              <span className="flex gap-1">
+                <span className="w-1 h-1 bg-accent rounded-full animate-bounce"></span>
+                <span className="w-1 h-1 bg-accent rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                <span className="w-1 h-1 bg-accent rounded-full animate-bounce [animation-delay:0.4s]"></span>
+              </span>
+              {Object.values(typingUsers).join(', ')} {Object.keys(typingUsers).length > 1 ? 'are' : 'is'} typing...
+            </p>
+          </div>
+        )}
+
         {/* Reply Bar */}
         {replyingTo && (
           <div className="mb-2 p-2 px-4 bg-accent/10 border-l-4 border-accent rounded-r-xl flex items-center justify-between animate-in slide-in-from-bottom-2">
@@ -330,6 +432,53 @@ export default function ChatScreen() {
                 searchDisabled={true}
                 skinTonesDisabled={true}
                />
+            </div>
+          </div>
+        )}
+
+        {/* Giphy Picker */}
+        {isGiphyOpen && (
+          <div className="absolute bottom-full left-4 mb-2 z-50 w-80 h-[450px] glass-card p-4 flex flex-col shadow-2xl animate-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-bold text-sm">Search GIFs</h4>
+              <button 
+                onClick={() => setIsGiphyOpen(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="relative mb-4">
+              <input 
+                type="text"
+                value={giphySearch}
+                onChange={(e) => setGiphySearch(e.target.value)}
+                placeholder="Search Giphy..."
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 pl-9 text-xs focus:outline-none focus:ring-1 focus:ring-accent/50"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+            </div>
+
+            <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-2 pr-1 custom-scrollbar">
+              {gifs.map((gif) => (
+                <button
+                  key={gif.id}
+                  onClick={() => {
+                    sendMessage('Sent a GIF', 'gif', gif.images.fixed_height.url, replyingTo || undefined)
+                    setIsGiphyOpen(false)
+                    setReplyingTo(null)
+                  }}
+                  className="relative aspect-square overflow-hidden rounded-lg hover:ring-2 hover:ring-accent transition-all group"
+                >
+                  <img 
+                    src={gif.images.fixed_height.url} 
+                    alt={gif.title} 
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -380,8 +529,21 @@ export default function ChatScreen() {
 
           <button
             onClick={() => {
+              setIsGiphyOpen(!isGiphyOpen)
+              setIsStickerOpen(false)
+              setIsEmojiOpen(false)
+            }}
+            className={`p-2.5 rounded-xl transition-all ${isGiphyOpen ? 'text-accent bg-accent/10' : 'text-slate-400 hover:text-accent hover:bg-white/5'}`}
+            title="GIFs"
+          >
+            <Gift size={20} />
+          </button>
+          
+          <button
+            onClick={() => {
               setIsStickerOpen(!isStickerOpen)
               setIsEmojiOpen(false)
+              setIsGiphyOpen(false)
             }}
             className={`p-2.5 rounded-xl transition-all ${isStickerOpen ? 'text-accent bg-accent/10' : 'text-slate-400 hover:text-accent hover:bg-white/5'}`}
             title="Stickers"
@@ -393,6 +555,7 @@ export default function ChatScreen() {
             onClick={() => {
               setIsEmojiOpen(!isEmojiOpen)
               setIsStickerOpen(false)
+              setIsGiphyOpen(false)
             }}
             className={`p-2.5 rounded-xl transition-all ${isEmojiOpen ? 'text-accent bg-accent/10' : 'text-slate-400 hover:text-accent hover:bg-white/5'}`}
             title="Emoji"

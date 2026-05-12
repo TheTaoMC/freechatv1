@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FreeChat v1 - Real-time 5-Person Group Chat
 
-## Getting Started
+A high-performance, real-time group chat application that automatically matches users into small, intimate rooms (max 5 people) with a focus on premium UI and customizable identity.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. Real-time Matchmaking
+- **Atomic Room Join**: Uses a dedicated SQL function (`join_available_room`) to handle concurrent joins safely.
+- **Auto-Cleanup**: Database triggers (`delete_empty_rooms`) automatically delete rooms and messages when the last person leaves.
+- **Capacity Control**: strictly limits rooms to 5 participants for better engagement.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Premium Chat Experience
+- **Glassmorphism UI**: A modern, sleek design with smooth transitions and animations.
+- **Media Support**: Seamlessly send images (via Supabase Storage), emojis, and built-in stickers.
+- **Contextual Replies**: Reply to specific messages with a clear preview of the original content.
+- **Read Receipts**: Real-time "Read by X" indicators using Supabase Presence.
+- **Notifications**: Native browser notifications and sound alerts for incoming messages.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Advanced Avatar System (DiceBear v9)
+- **Deep Customization**: Adjust head, eyes, eyebrows, mouth, clothing, and accessories.
+- **Schema-Perfect**: Fully synced with official DiceBear `schema.json` for 100% parameter accuracy.
+- **Smart Validation**: Handles "none" selections by setting `Probability=0` to satisfy v9 API requirements.
+- **Real-time Sync**: Avatars update instantly across the app and for all online users when changed in profile.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Technical Stack
+- **Framework**: Next.js 15 (App Router)
+- **Backend/Auth**: Supabase (PostgreSQL, Realtime, Auth, Storage)
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Avatars**: DiceBear API v9 (Avataaars style)
 
-## Learn More
+## 📅 Future Roadmap
+- **Custom Hand-Drawn Avatars**: Support for layered PNG rendering to allow unique community art.
+- **Voice Messaging**: Audio recording and playback within the chat flow.
+- **Giphy Integration**: Search and send dynamic GIFs directly from the input bar.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Status: Production Ready. System stable and documented.*

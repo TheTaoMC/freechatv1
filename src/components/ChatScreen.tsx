@@ -29,6 +29,7 @@ export default function ChatScreen() {
   
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textInputRef = useRef<HTMLInputElement>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const supabase = createClient()
 
@@ -227,7 +228,10 @@ export default function ChatScreen() {
 
                   {/* Reply Button on Hover */}
                   <button
-                    onClick={() => setReplyingTo({ id: Number(msg.id), content: msg.content, name: msg.user_name })}
+                    onClick={() => {
+                      setReplyingTo({ id: Number(msg.id), content: msg.content, name: msg.user_name })
+                      textInputRef.current?.focus()
+                    }}
                     className={`p-1.5 rounded-full bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover/msg:opacity-100`}
                     title="Reply"
                   >
@@ -374,7 +378,7 @@ export default function ChatScreen() {
             className="flex-1 flex items-center gap-2"
           >
             <div className="relative flex-1">
-              <input
+                ref={textInputRef}
                 type="text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}

@@ -378,6 +378,7 @@ export default function ChatScreen() {
             className="flex-1 flex items-center gap-2"
           >
             <div className="relative flex-1">
+              <input
                 ref={textInputRef}
                 type="text"
                 value={text}

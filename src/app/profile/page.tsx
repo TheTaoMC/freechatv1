@@ -11,7 +11,7 @@ import Link from 'next/link'
 import AvatarPicker, { getAvatarUrl, AVATAR_OPTIONS } from '@/components/AvatarPicker'
 
 export default function ProfilePage() {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, refreshProfile } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -62,8 +62,8 @@ export default function ProfilePage() {
         })
 
       if (error) throw error
+      await refreshProfile()
       setMessage('Profile updated successfully!')
-      // Refresh will happen via AuthContext state change or manual refresh
     } catch (error) {
       console.error('Error updating profile:', error)
       setMessage('Failed to update profile.')

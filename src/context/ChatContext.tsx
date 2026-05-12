@@ -102,15 +102,15 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         }
       })
 
-    // Re-track when messages or profile changes
-    if (messages.length > 0 || profile) {
-        presenceChannel.track({
-            user_id: user?.id,
-            user_name: profile?.display_name || 'Guest',
-            avatar_url: profile?.avatar_config ? getAvatarUrl(profile.avatar_config) : profile?.avatar_url,
-            online_at: new Date().toISOString(),
-            last_read_id: messages.length > 0 ? messages[messages.length - 1].id : null
-        })
+    // Re-track when profile changes
+    if (profile && presenceChannel) {
+      presenceChannel.track({
+        user_id: user?.id,
+        user_name: profile?.display_name || 'Guest',
+        avatar_url: profile?.avatar_config ? getAvatarUrl(profile.avatar_config) : profile?.avatar_url,
+        online_at: new Date().toISOString(),
+        last_read_id: messages.length > 0 ? messages[messages.length - 1].id : null
+      })
     }
 
 

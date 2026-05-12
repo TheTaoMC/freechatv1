@@ -11,6 +11,7 @@ type AuthContextType = {
   signInWithGoogle: () => Promise<void>
   signInAnonymously: (displayName: string) => Promise<void>
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -100,8 +101,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setProfile(null)
   }
 
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id)
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signInWithGoogle, signInAnonymously, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signInWithGoogle, signInAnonymously, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
